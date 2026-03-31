@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunny Harper - Health Matters Clinic Chat Widget</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .container {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 3rem;
+      max-width: 600px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 1.5rem;
+    }
+    h1 {
+      font-size: 2rem;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 2rem;
+    }
+    .instructions {
+      background: #f8f9fa;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: left;
+      margin-bottom: 2rem;
+    }
+    .instructions h3 {
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #666;
+      margin-bottom: 1rem;
+    }
+    pre {
+      background: #1a1a1a;
+      color: #4ade80;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+    .note {
+      font-size: 0.875rem;
+      color: #666;
+      margin-top: 1rem;
+    }
+    .test-btn {
+      display: inline-block;
+      background: #233dff;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 9999px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 1rem;
+      border: 1.5px solid black;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="https://cdn.prod.website-files.com/67359e6040140078962e8a54/6912e29e5710650a4f45f53f_Untitled%20(256%20x%20256%20px).png" alt="HMC Logo" class="logo">
+    <h1>Sunny Harper</h1>
+    <p class="subtitle">AI Resource Navigator for Health Matters Clinic</p>
+
+    <div class="instructions">
+      <h3>Embed on Your Website</h3>
+      <pre>&lt;script src="<span id="script-url">https://YOUR-URL-HERE</span>/sunny-harper.iife.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  SunnyHarper.init({
+    lang: 'en',
+    position: 'bottom-right'
+  });
+&lt;/script&gt;</pre>
+      <p class="note">Replace YOUR-URL-HERE with this page's URL</p>
+    </div>
+
+    <p>Click the chat button in the bottom right to test Sunny!</p>
+  </div>
+
+  <!-- Load Sunny Harper -->
+  <script src="./sunny-harper.iife.js"></script>
+  <script>
+    SunnyHarper.init({
+      lang: 'en',
+      position: 'bottom-right'
+    });
+
+    // Update the script URL display
+    const currentUrl = window.location.origin;
+    document.getElementById('script-url').textContent = currentUrl;
+  </script>
+</body>
+</html>
