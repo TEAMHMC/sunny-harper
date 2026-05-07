@@ -1,0 +1,14 @@
+# Netlify configuration for Sunny Harper Chat Widget
+# Deploy: drag the 'dist/widget' folder to netlify.com/drop
+
+[build]
+  command = "npm run build:widget"
+  publish = "dist/widget"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"
+    Cache-Control = "public, max-age=31536000"

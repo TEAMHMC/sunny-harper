@@ -1,0 +1,5 @@
+node_modules/
+dist/assets/
+dist/index.html
+.DS_Store
+*.local
