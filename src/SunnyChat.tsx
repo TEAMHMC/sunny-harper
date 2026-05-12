@@ -210,11 +210,12 @@ export const SunnyChat: React.FC<SunnyConfig> = (props) => {
     const transcript = messages.slice(-15).map(m => ({ type: m.type, content: m.content }));
     const summary = messages.filter(m => m.type === 'user').slice(-3).map(m => m.content).join(' | ');
     try {
-      await fetch(SUNNY_HANDOFF_ENDPOINT, {
+      const res = await fetch(SUNNY_HANDOFF_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId, category: handoff.category, transcript, summary, userContact: contact, lang }),
       });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       addBotMessage(
         lang === 'es'
           ? `Listo. Alguien del equipo de Health Matters Clinic se pondra en contacto contigo en ${contact}. ${text.handoff_confirm}`
@@ -253,13 +254,18 @@ export const SunnyChat: React.FC<SunnyConfig> = (props) => {
       try {
         await fetch(`${SUNNY_MEMORY_ENDPOINT}/${sessionId}`, { method: 'DELETE' });
         localStorage.removeItem('sunny_messages');
+        localStorage.removeItem('sunny_session_id');
       } catch {}
       setIsTyping(false);
-      addBotMessage(
-        lang === 'es'
+      setMessages([{
+        id: `bot-${Date.now()}`,
+        type: 'bot',
+        content: lang === 'es'
           ? 'Listo. Tus datos de sesion de Sunny han sido eliminados. No retendre nada de esta conversacion en sesiones futuras.'
-          : 'Done. Your Sunny session data has been cleared. I will not retain anything from this conversation in future sessions.'
-      );
+          : 'Done. Your Sunny session data has been cleared. I will not retain anything from this conversation in future sessions.',
+        timestamp: new Date(),
+        senderName: 'Sunny',
+      }]);
       return;
     }
 
