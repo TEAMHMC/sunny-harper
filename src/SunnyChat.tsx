@@ -392,7 +392,7 @@ export const SunnyChat: React.FC<SunnyConfig> = (props) => {
             bottom: '80px',
             zIndex: 9998,
             width: 'min(400px, calc(100vw - 2rem))',
-            height: '580px',
+            height: 'min(580px, calc(100dvh - 120px))',
             backgroundColor: 'white',
             borderRadius: '16px',
             border: '1.5px solid black',
@@ -540,7 +540,7 @@ export const SunnyChat: React.FC<SunnyConfig> = (props) => {
           )}
 
           {/* Input */}
-          <div style={{ padding: '10px 12px', backgroundColor: 'white', borderTop: '1px solid #e5e7eb' }}>
+          <div style={{ padding: '10px 12px', paddingBottom: 'max(10px, calc(10px + env(safe-area-inset-bottom, 0px)))', backgroundColor: 'white', borderTop: '1px solid #e5e7eb' }}>
             <form
               onSubmit={(e) => { e.preventDefault(); handleSendMessage(inputValue); }}
               style={{ display: 'flex', gap: '8px', alignItems: 'center' }}

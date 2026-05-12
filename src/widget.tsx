@@ -213,12 +213,34 @@ const init = (config: SunnyConfig = {}) => {
     document.body.appendChild(container);
   }
 
+  // Guard: do not create a new root if one already exists on this container
+  if ((container as any)._sunnyRoot) {
+    console.warn('SunnyHarper: widget is already initialised. Call SunnyHarper.destroy() first to re-init.');
+    return;
+  }
+
   // Render
   const root = ReactDOM.createRoot(container);
   root.render(<SunnyChat {...config} />);
+
+  // Store root reference on the container so destroy() can unmount it
+  (container as any)._sunnyRoot = root;
+};
+
+const destroy = () => {
+  const container = document.getElementById('sunny-harper-widget');
+  if (!container) return;
+
+  if ((container as any)._sunnyRoot) {
+    (container as any)._sunnyRoot.unmount();
+    delete (container as any)._sunnyRoot;
+  }
+
+  // Remove the container element from the DOM (it was created by init)
+  container.parentNode?.removeChild(container);
 };
 
 // Export for window object
-(window as any).SunnyHarper = { init };
+(window as any).SunnyHarper = { init, destroy };
 
-export { init };
+export { init, destroy };
