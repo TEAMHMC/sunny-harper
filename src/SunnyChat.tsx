@@ -63,6 +63,7 @@ const TEXT = {
     handoff_prompt: 'What is the best way to reach you — email or phone number?',
     handoff_confirm: 'I will make sure the right person gets this.',
     error: 'Sorry, I\'m having trouble right now. Browse our Resource Directory or Event Finder to find what you need — or call 988 for immediate support.',
+    clear_chat: 'Clear chat',
   },
   es: {
     greeting: 'Hola, soy Sunny. Que te trae por aqui hoy?',
@@ -78,6 +79,7 @@ const TEXT = {
     handoff_prompt: 'Cual es la mejor manera de contactarte — correo electronico o numero de telefono?',
     handoff_confirm: 'Me asegurare de que la persona correcta reciba esto.',
     error: 'Lo siento, estoy teniendo problemas ahora mismo. Busca en nuestro Directorio de Recursos o en el Buscador de Eventos — o llama al 988 para apoyo inmediato.',
+    clear_chat: 'Borrar chat',
   },
 };
 
@@ -129,7 +131,7 @@ export const SunnyChat: React.FC<SunnyConfig> = (props) => {
       if (!parsed.length) return [];
       const lastMsg = new Date(parsed[parsed.length - 1].timestamp);
       const hoursSince = (Date.now() - lastMsg.getTime()) / 3600000;
-      if (hoursSince > 24) return [];
+      if (hoursSince > 4) return [];
       return parsed.map(m => ({ ...m, timestamp: new Date(m.timestamp) }));
     } catch { return []; }
   });
@@ -151,7 +153,7 @@ export const SunnyChat: React.FC<SunnyConfig> = (props) => {
   // Persist messages
   useEffect(() => {
     try {
-      localStorage.setItem('sunny_messages', JSON.stringify(messages.slice(-30)));
+      localStorage.setItem('sunny_messages', JSON.stringify(messages.slice(-15)));
     } catch {}
   }, [messages]);
 
@@ -206,20 +208,34 @@ export const SunnyChat: React.FC<SunnyConfig> = (props) => {
   }, [addBotMessage, text.handoff_prompt]);
 
   const submitHandoff = useCallback(async (contact: string) => {
+    // Validate: must contain @ (email) or at least 7 digits (phone)
+    const hasEmail = contact.includes('@');
+    const hasPhone = (contact.replace(/\D/g, '').length >= 7);
+    if (!hasEmail && !hasPhone) {
+      addBotMessage(lang === 'es'
+        ? 'Por favor ingresa un correo electronico o numero de telefono valido.'
+        : 'Please enter a valid email address or phone number.');
+      return;
+    }
+
     setHandoff(prev => ({ ...prev, awaitingContact: false }));
     const transcript = messages.slice(-15).map(m => ({ type: m.type, content: m.content }));
     const summary = messages.filter(m => m.type === 'user').slice(-3).map(m => m.content).join(' | ');
     try {
-      const res = await fetch(SUNNY_HANDOFF_ENDPOINT, {
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), 10000)
+      );
+      const fetchPromise = fetch(SUNNY_HANDOFF_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId, category: handoff.category, transcript, summary, userContact: contact, lang }),
       });
+      const res = await Promise.race([fetchPromise, timeoutPromise]);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       addBotMessage(
         lang === 'es'
-          ? `Listo. Alguien del equipo de Health Matters Clinic se pondra en contacto contigo en ${contact}. ${text.handoff_confirm}`
-          : `Done. Someone from the Health Matters Clinic team will reach out to you at ${contact}. ${text.handoff_confirm}`
+          ? `Listo. Alguien del equipo de Health Matters Clinic se pondra en contacto contigo pronto. ${text.handoff_confirm}`
+          : `Done. Someone from the Health Matters Clinic team will be in touch soon. ${text.handoff_confirm}`
       );
     } catch {
       addBotMessage(text.error);
@@ -229,6 +245,7 @@ export const SunnyChat: React.FC<SunnyConfig> = (props) => {
 
   const handleSendMessage = useCallback(async (content: string) => {
     if (!content.trim()) return;
+    if (isTyping) return;
 
     // Detect language from first user message
     if (messages.filter(m => m.type === 'user').length === 0) {
@@ -502,6 +519,22 @@ export const SunnyChat: React.FC<SunnyConfig> = (props) => {
                     {lang === 'en' ? action.label : action.labelEs}
                   </button>
                 ))}
+                <button
+                  onClick={() => {
+                    try { localStorage.removeItem('sunny_messages'); } catch {}
+                    try { localStorage.removeItem('sunny_session_id'); } catch {}
+                    setMessages([]);
+                    setShowQuickActions(true);
+                    setTimeout(() => {
+                      setMessages([
+                        { id: 'greeting-clear', type: 'bot', content: text.greeting, timestamp: new Date(), senderName: 'Sunny' },
+                      ]);
+                    }, 300);
+                  }}
+                  style={{ padding: '5px 12px', backgroundColor: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '20px', fontSize: '12px', fontWeight: 600, color: '#374151', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                >
+                  {text.clear_chat}
+                </button>
               </div>
             </div>
           )}
